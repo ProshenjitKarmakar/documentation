@@ -1,0 +1,38 @@
+
+
+use Image;
+use File;
+
+// For store
+        
+    if($request->image)
+    {
+        $image = $request->file('image');
+        $imageCustomName = rand().'.'.$image->getClientOriginalExtension();
+        $location = public_path('backend/sliderImages/'.$imageCustomName);
+        Image::make($image)->save($location);
+        $slider->image=$imageCustomName;
+    }
+
+
+// For update
+    
+    if(!empty($request->image)){
+    if(File::exists('backend/sliderImages'.$slider_update->image)){
+        File::delete('backend/sliderImages'.$slider_update->image);
+    }
+    
+    $image = $request->file('image');
+    $imageCustomName = rand().'.'.$image->getClientOriginalExtension();
+    $location = public_path('backend/sliderImages/'.$imageCustomName);
+    Image::make($image)->save($location);
+    $slider_update->image = $imageCustomName;
+}
+
+// For delete
+
+    $delete_slider= Slider::find($id);
+    if(File::exists('backend/sliderImages/'.$delete_slider->image))
+    {
+        File::delete('backend/sliderImages/'.$delete_slider->image);
+    }

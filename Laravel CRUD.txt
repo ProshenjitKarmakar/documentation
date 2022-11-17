@@ -1,0 +1,103 @@
+
+/===================================================================\
+/=========================== Controller ============================\
+/===================================================================\
+
+    CMD Command for Controller : php artisan make:controller ControllerName -r 
+
+    //For manage page
+    public function index()
+    {
+        $allProduct= Product::orderby('id', 'desc')->get();
+        return view('backend.pages.product.productManage', compact('allProduct'));
+    }
+
+
+    //For view create page
+    public function create()
+    {
+        return view('backend.pages.product.addProduct');
+    }
+
+
+    //For store data to database
+    public function store(Request $request)
+    {
+        
+        $request->validate([
+            'product_name'=>'required',
+        ]);
+
+        $product= new Product();
+        
+        $product->product_name= $request->product_name;
+
+        $product->save();
+        //dd($product);
+        return redirect()->route('dashboard');
+    }
+
+    // Going to edit page to edit
+    public function edit($id)
+    {
+        $product= Product::find($id);
+        return view('backend.pages.product.editProduct',compact('product'));
+    }
+
+
+    // After edit we will store 
+    public function update(Request $request, $id)
+    {
+        $product =Product::find($id);
+        
+        $product->product_name= $request->product_name;
+
+        $product->update();
+        return redirect()->route('productManage');
+    }
+
+
+    //For delete an item
+    public function destroy($id)
+    {
+        $product = Product::find($id);
+        $product->delete();
+        return redirect()->route('productManage');
+    }
+
+
+
+/===================================================================\
+/=========================== Model =================================\
+/===================================================================\
+
+Model : 
+    CMD Command for Model : php artisan make:model ModelName -m
+
+
+    class ModelName extends Model
+    {
+    use HasFactory;
+
+    protected $guarded = []; //or instade we can use $fillable
+    protected $fillable = [
+        'vendor_id',
+    ];
+    public function product()
+    {
+        return $this->belongsTo(Product::class,'product_name');
+    }
+}
+
+/===================================================================\
+/=========================== Database ==============================\
+/===================================================================\
+
+        Schema::create('FromModel', function (Blueprint $table) {
+            
+            $table->increments('id');
+            $table->string('product_id')->nullable();
+            $table->integer('status')->default(1)->comment('1. for Active 2. for Inactive');
+
+            $table->timestamps();
+        });

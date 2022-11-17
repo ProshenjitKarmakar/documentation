@@ -1,0 +1,32 @@
+/===================================================================\
+/================ Path : public/assests/js/custom.js  ==============\
+/===================================================================\
+    
+    jQuery(document).ready(function(){
+        jQuery(document).on('change','#product_name',function(){
+            var product_id = jQuery(this).val();
+            $.ajax({
+                url: 'productDetailesShow/'+product_id,
+                type : 'GET',
+                dataType : 'json',
+                success: function(response){
+                    jQuery('#product_price').val(response.data.product_price);
+                    jQuery('#product_disPrice').val(response.data.discount_price);
+                    jQuery('#product_category').val(response.data.category.category_name);
+                }
+            });
+        });
+    });
+
+
+/===================================================================\
+/=========================== Controller  ===========================\
+/===================================================================\
+    public function productDetailesShow($id)
+    {
+        $productdetailes = Product::with('category')->find($id);
+
+        return response()->json([
+            'data' => $productdetailes     
+        ]);
+    }
