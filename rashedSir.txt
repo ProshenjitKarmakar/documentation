@@ -1,0 +1,581 @@
+
+{{---------------------------------------Showing Address  -----------------------------------------------------------}}
+
+@php($shipping_addresses = \App\Model\BillingAddress::where('customer_id', auth('customer')->id())->get())
+@foreach($shipping_addresses as $key => $address)
+    <div class="shadow p-3 mb-5 bg-white rounded fw-normal mt-3" style="font-family: 'Roboto', sans-serif;font-size: 12px;">
+        <style> @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap'); </style>
+        <div>
+            <p style="">Delivery to : {{$address['contact_person_name']}}</p>
+            <p><span class="badge bg-success"> {{$address['address_type']}} </span> {{$address['phone']}} | {{$address['address']}}, {{$address['zip']}}, {{$address['city']}}. </p>
+
+            <p>Bill to the same address <a href="#" id="billing_id" data-id = {{$address->id}} class="text-decoration-none text-primary"data-bs-toggle="modal"  data-bs-target="#staticBackdropforBillingAddressEdit" >Edit</a></p>
+
+            @php($customer_email = \App\User::where('id', auth('customer')->id())->select('id','email')->get())
+            @foreach($customer_email as $user_email)
+            <p>Email to : {{ $user_email->email }}
+                 <a href="" data-bs-toggle="modal"
+                data-bs-target="#staticBackdropforEmail" data-id ={{ $user_email->id }} class="text-decoration-none text-primary edit_email">Edit</a></p>
+            @endforeach
+        </div>
+
+    </div>
+    @endforeach
+{{--------------------------------------- Model for Edit Billing Address -----------------------------------------------------------}}
+<div class="popup-model" style="font-family: 'Barlow Condensed', sans-serif;">
+    <form method="post" action="" id="editBillingAddressForm">
+        @csrf
+        <div class="popup-model" style="font-family: 'Barlow Condensed', sans-serif;">
+            <div class="modal fade" id="staticBackdropforBillingAddressEdit" data-bs-backdrop="static"
+                data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="staticBackdropLabel">Edit Billing Address</h5>
+                        </div>
+                        <div id="accordion">
+                            <div class="modal-body">
+                                <div class="br-pagebody">
+                                    <div class="row row-sm">
+                                        <div class="col-sm-12">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group m-2">
+                                                        <label class="fw-bolder m-1"
+                                                            for="exampleInputEmail1">{{ \App\CPU\translate('contact_person_name') }}
+                                                            <span style="color: red">*</span></label>
+                                                        <input class="form-control" type="text" id="bill_contact_person_name"
+                                                            name="contact_person_name"
+                                                            {{ $shipping_addresses->count() == 0 ? 'required' : '' }}>
+
+                                                    </div>
+                                                    <div class="form-group m-2">
+                                                        <label class="fw-bolder"
+                                                            for="exampleInputEmail1">{{ \App\CPU\translate('Phone') }}
+                                                            <span style="color: red">*</span></label>
+                                                        <input type="text" class="form-control" id="bill_phone"
+                                                            name="phone" value=""
+                                                            {{ $shipping_addresses->count() == 0 ? 'required' : '' }}>
+                                                    </div>
+                                                    <div class="form-group m-2">
+                                                        <label class="fw-bolder m-1"
+                                                            for="exampleInputPassword1">{{ \App\CPU\translate('address') }}
+                                                            {{ \App\CPU\translate('Select a label for effective delivery:') }}</label>
+                                                        <br>
+
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input bill_address_type"
+                                                                type="radio" name="address_type" value="home"
+                                                                    id="bill_address_type_home">        {{-- {{ $billing_addresses->address_type == 'home' ? 'checked' : '' }} --}}
+                                                            <label class="form-check-label"
+                                                                for="">Home</label>
+                                                        </div>
+
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input bill_address_type"
+                                                                type="radio" name="address_type" value="office"
+                                                                id="bill_address_type_office">
+                                                            <label class="form-check-label"
+                                                                for="">Office</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group m-2">
+                                                        <label class="fw-bolder m-1" for="">City
+                                                            <span class="text-danger">*</span></label>
+                                                        <select class="form-control city" name="city" id="bill_city"
+                                                            {{ $shipping_addresses->count() == 0 ? 'required' : '' }}>
+                                                            <option value="">------------Select
+                                                                City------------</option>
+                                                                @php($districts = \App\Model\District::all())
+                                                                @foreach ($districts as $district)
+                                                                    <option value="{{ $district->id }}">{{ $district->name }}</option>
+                                                                @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-6">
+
+                                                    <div class="form-group m-2">
+                                                        <label class="fw-bolder m-1" for="">Area
+                                                            <span class="text-danger">*</span></label>
+                                                        <select class="form-control zip" name="zip" id="bill_zip"
+                                                            {{ $shipping_addresses->count() == 0 ? 'required' : '' }}>
+                                                            <option value="">------------Select
+                                                                Area------------</option>
+                                                                @php($areas = \App\Model\Area::all())
+                                                                @foreach ($areas as $area)
+                                                                    <option value="{{ $area->name }}">{{ $area->name }}</option>
+                                                                @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group m-2">
+                                                        <label class="fw-bolder m-1"
+                                                            for="">Address <span
+                                                                class="text-danger">*</span></label>
+                                                        <input class="form-control" type="text"
+                                                            name="address"
+                                                            {{ $shipping_addresses->count() == 0 ? 'required' : '' }}
+                                                            id="bill_address" value=""
+                                                            placeholder="House no. / Building / Street / Area">
+                                                    </div>
+                                                    <div class="form-group m-2">
+                                                        <label class="fw-bolder m-1"
+                                                            for="">Default Address
+                                                            (Optional)</label>
+                                                        <div class="card">
+                                                            <div class="card-body">
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input"
+                                                                        type="checkbox"
+                                                                        name="save_address"
+                                                                        id="exampleCheck1" checked>
+                                                                    <label class="form-check-label"
+                                                                        for="exampleCheck1"
+                                                                        style="padding-{{ Session::get('direction') === 'rtl' ? 'right' : 'left' }}: 1.09rem">
+                                                                        {{ \App\CPU\translate('Default_shipping_address') }}
+                                                                    </label>
+                                                                </div>
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input"
+                                                                        type="checkbox"
+                                                                        name="save_billing_address"
+                                                                        id="exampleCheck1" value="checked" checked>
+                                                                    <label class="form-check-label"
+                                                                        for="exampleCheck1"
+                                                                        style="padding-{{ Session::get('direction') === 'rtl' ? 'right' : 'left' }}: 1.09rem">
+                                                                        {{ \App\CPU\translate('Default_billing_address') }}
+                                                                    </label>
+                                                                </div>
+                                                                <input type="hidden" id="latitude"
+                                                                    name="latitude" class="form-control d-inline"
+                                                                    placeholder="Ex : -94.22213"
+                                                                    value="{{$default_location?$default_location['lat']:0}}" required
+                                                                    readonly>
+                                                                <input type="hidden"
+                                                                    name="longitude" class="form-control"
+                                                                    placeholder="Ex : 103.344322" id="longitude"
+                                                                    value="{{$default_location?$default_location['lng']:0}}" required
+                                                                    readonly>
+                                                                <p class="mt-2">Your existing default
+                                                                    address setting will be replaced if
+                                                                    you make some changes here.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <input type="hidden" name="billingAddress_id" id="billingAddress_id">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+                            <button type="submit" class="btn btn--primary"><span class="d-none d-sm-inline">{{ \App\CPU\translate('save') }}</span>
+                                <span class="d-inline d-sm-none">{{ \App\CPU\translate('Next') }}</span>
+                                <i class="czi-arrow-{{ Session::get('direction') === 'rtl' ? 'left' : 'right' }} mt-sm-0 mx-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{{--------------------------------------- End Model for Edit Billing Address  -----------------------------------------------------------}}
+
+{{--------------------------------------- Model for Edit Email  -----------------------------------------------------------}}
+<div class="popup-model" style="font-family: 'Barlow Condensed', sans-serif;">
+<!-- Modal -->
+    <form action="" method="post" id="EmailSubmitForm">
+        @csrf
+    <div class="modal fade" id="staticBackdropforEmail" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Email</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group m-2">
+                        <label class="fw-bolder"
+                            for="exampleInputEmail1">{{ \App\CPU\translate('Email') }}
+                            <span style="color: red">*</span></label>
+                        <input type="text" class="form-control" value="{{ $user_email->email }}"
+                            name="email">
+                    </div>
+                    <input type="hidden" name="email_id" value="{{ $user_email->id }}">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn--primary"><span class="d-none d-sm-inline">{{ \App\CPU\translate('Update Email') }}</span>
+                        <i class="czi-arrow-{{ Session::get('direction') === 'rtl' ? 'left' : 'right' }} mt-sm-0 mx-1"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </form>
+</div>
+
+{{--------------------------------------- End Model for Edit Email  -----------------------------------------------------------}}
+{{---------------------------------------End Showing Address  -----------------------------------------------------------}}
+
+{{--------------------------------------- Model button Add New Delivery -----------------------------------------------------------}}
+<div class="shadow p-2 mb-5 bg-white rounded mt-3" id="modelButton">
+    <a type="button" class="btn btn-lg btn-block text-primary" data-bs-toggle="modal"
+        data-bs-target="#staticBackdrop"><i class="fa fa-plus"></i> Add New Delivery Address</a>
+</div>
+{{---------------------------------------End Model button Add New Delivery -----------------------------------------------------------}}
+
+                    <!-- Bootstrap CSS -->
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+                        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+                        crossorigin="anonymous">
+                    <link href='https://fonts.googleapis.com/css?family=Barlow+Condensed:400,400italic' rel='stylesheet'
+                        type='text/css'>
+
+<!---------------------------------------------- Modal for Shipping/Billing Address Save --------------------------------------------------------------------->
+
+                    {{-- @if ($physical_product) --}}
+                        <h2 class="h4 pb-3 mb-2 mt-5">{{ \App\CPU\translate('choose_shipping_address') }}</h2>
+                        @php($shipping_addresses = \App\Model\ShippingAddress::where('customer_id', auth('customer')->id())->where('is_billing', 0)->get())
+                            <form method="post" action="" id="ShippingAddressForm">
+                                @csrf
+                                <div class="popup-model" style="font-family: 'Barlow Condensed', sans-serif;">
+                                    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static"
+                                        data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel"
+                                        aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="staticBackdropLabel">Add New Delivery Address</h5>
+                                                </div>
+                                                <div id="accordion">
+                                                    <div class="modal-body">
+                                                        <div class="br-pagebody">
+                                                            <div class="row row-sm">
+                                                                <div class="col-sm-12">
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group m-2">
+                                                                                <label class="fw-bolder m-1"
+                                                                                    for="exampleInputEmail1">{{ \App\CPU\translate('contact_person_name') }}
+                                                                                    <span style="color: red">*</span></label>
+                                                                                <input class="form-control" type="text"
+                                                                                    name="contact_person_name"
+                                                                                    {{ $shipping_addresses->count() == 0 ? 'required' : '' }}>
+
+                                                                            </div>
+                                                                            <div class="form-group m-2">
+                                                                                <label class="fw-bolder"
+                                                                                    for="exampleInputEmail1">{{ \App\CPU\translate('Phone') }}
+                                                                                    <span style="color: red">*</span></label>
+                                                                                <input type="text" class="form-control"
+                                                                                    name="phone"
+                                                                                    {{ $shipping_addresses->count() == 0 ? 'required' : '' }}>
+                                                                            </div>
+                                                                            <div class="form-group m-2">
+                                                                                <label class="fw-bolder m-1"
+                                                                                    for="exampleInputPassword1">{{ \App\CPU\translate('address') }}
+                                                                                    {{ \App\CPU\translate('Select a label for effective delivery:') }}</label>
+                                                                                <br>
+
+                                                                                <div class="form-check form-check-inline">
+                                                                                    <input class="form-check-input"
+                                                                                        type="radio" name="address_type"
+                                                                                        id="address_type" value="home">
+                                                                                    <label class="form-check-label"
+                                                                                        for="">Home</label>
+                                                                                </div>
+                                                                                <div class="form-check form-check-inline">
+                                                                                    <input class="form-check-input"
+                                                                                        type="radio" name="address_type"
+                                                                                        id="address_type" value="office">
+                                                                                    <label class="form-check-label"
+                                                                                        for="">Office</label>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="form-group m-2">
+                                                                                <label class="fw-bolder m-1" for="">City
+                                                                                    <span class="text-danger">*</span></label>
+                                                                                <select class="form-control city" name="city"
+                                                                                    {{ $shipping_addresses->count() == 0 ? 'required' : '' }}>
+                                                                                    <option value="">------------Select
+                                                                                        City------------</option>
+                                                                                        @php($districts = \App\Model\District::all())
+                                                                                        @foreach ($districts as $district)
+                                                                                            <option value="{{ $district->id }}">{{ $district->name }}</option>
+                                                                                        @endforeach
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="col-md-6">
+
+                                                                            <div class="form-group m-2">
+                                                                                <label class="fw-bolder m-1" for="">Area
+                                                                                    <span class="text-danger">*</span></label>
+                                                                                <select class="form-control zip" name="zip" id="zip"
+                                                                                    {{ $shipping_addresses->count() == 0 ? 'required' : '' }}>
+                                                                                    <option value="">------------Select
+                                                                                        Area------------</option>
+                                                                                        @php($areas = \App\Model\Area::all())
+                                                                                        @foreach ($areas as $area)
+                                                                                            <option value="{{ $area->name }}">{{ $area->name }}</option>
+                                                                                        @endforeach
+                                                                                </select>
+                                                                            </div>
+                                                                            <div class="form-group m-2">
+                                                                                <label class="fw-bolder m-1"
+                                                                                    for="">Address <span
+                                                                                        class="text-danger">*</span></label>
+                                                                                <input class="form-control" type="text"
+                                                                                    name="address"
+                                                                                    {{ $shipping_addresses->count() == 0 ? 'required' : '' }}
+                                                                                    id="address"
+                                                                                    placeholder="House no. / Building / Street / Area">
+                                                                            </div>
+                                                                            <div class="form-group m-2">
+                                                                                <label class="fw-bolder m-1"
+                                                                                    for="">Default Address
+                                                                                    (Optional)</label>
+                                                                                <div class="card">
+                                                                                    <div class="card-body">
+                                                                                        <div class="form-check">
+                                                                                            <input class="form-check-input"
+                                                                                                type="checkbox"
+                                                                                                name="save_address"
+                                                                                                id="exampleCheck1" value="11">
+                                                                                            <label class="form-check-label"
+                                                                                                for="exampleCheck1"
+                                                                                                style="padding-{{ Session::get('direction') === 'rtl' ? 'right' : 'left' }}: 1.09rem">
+                                                                                                {{ \App\CPU\translate('Default_shipping_address') }}
+                                                                                            </label>
+                                                                                        </div>
+                                                                                        <div class="form-check">
+                                                                                            <input class="form-check-input"
+                                                                                                type="checkbox"
+                                                                                                name="save_billing_address"
+                                                                                                id="exampleCheck1" value="checked">
+                                                                                            <label class="form-check-label"
+                                                                                                for="exampleCheck1"
+                                                                                                style="padding-{{ Session::get('direction') === 'rtl' ? 'right' : 'left' }}: 1.09rem">
+                                                                                                {{ \App\CPU\translate('Default_billing_address') }}
+                                                                                            </label>
+                                                                                        </div>
+                                                                                        <input type="hidden" id="latitude"
+                                                                                            name="latitude" class="form-control d-inline"
+                                                                                            placeholder="Ex : -94.22213"
+                                                                                            value="{{$default_location?$default_location['lat']:0}}" required
+                                                                                            readonly>
+                                                                                        <input type="hidden"
+                                                                                            name="longitude" class="form-control"
+                                                                                            placeholder="Ex : 103.344322" id="longitude"
+                                                                                            value="{{$default_location?$default_location['lng']:0}}" required
+                                                                                            readonly>
+                                                                                        <p class="mt-2">Your existing default
+                                                                                            address setting will be replaced if
+                                                                                            you make some changes here.</p>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+                                                    <button type="submit" class="btn btn--primary"><span class="d-none d-sm-inline">{{ \App\CPU\translate('save') }}</span>
+                                                        <span class="d-inline d-sm-none">{{ \App\CPU\translate('Next') }}</span>
+                                                        <i class="czi-arrow-{{ Session::get('direction') === 'rtl' ? 'left' : 'right' }} mt-sm-0 mx-1"></i></button>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                    {{-- @endif --}}
+
+                    <!-- End Model -->
+
+                    <!-- Option 1: Bootstrap Bundle with Popper -->
+                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+                        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">
+                    </script>
+
+
+<!---------------------------------------------- End Modal --------------------------------------------------------------------->
+
+
+
+
+
+
+
+
+=============================================AjAx=====================================================================
+
+
+
+
+
+<script>
+    jQuery(document).ready(function(){
+
+        jQuery('#ShippingAddressForm').on('submit', function(event){
+            event.preventDefault();
+
+            $.ajax({
+                url     : '{{route("save-shipping-address")}}',
+                type    : 'post',
+                dataType: 'html',
+                data    : $('#ShippingAddressForm').serialize(),
+                success : function(response){
+                    console.log(response);
+                    jQuery('#staticBackdrop').modal('hide');
+                    location.reload();
+                    jQuery('#modelButton').hide();
+                },
+            })
+        });
+
+    });
+</script>
+<script>
+    jQuery('.city').change(function(event){
+                var city_id = jQuery(this).val();
+                // console.log(city_id);
+
+                jQuery('.zip').html('');
+
+                $.ajax({
+                    url         : '{{route("get-area")}}',
+                    type        : 'POST',
+                    dataType    : 'json',
+                    data        : {
+                        district_id : city_id,
+                        _token     : '{{ csrf_token() }}'
+                    },
+                    success     : function(response){
+                        // console.log(response.area);
+                        jQuery('.zip').html('<option value="">----------Select State----------</option>');
+                        jQuery.each(response.area, function(index, area){
+                            jQuery('.zip').append('<option value="'+area.name+'">'+area.name+'</option>');
+                        });
+                    },
+                });
+            });
+</script>
+<script>
+    jQuery('#EmailSubmitForm').on('submit', function(event){
+            event.preventDefault();
+
+            $.ajax({
+                url     : '{{ route("edit-email") }}',
+                type    : 'post',
+                dataType: 'json',
+                data    : $('#EmailSubmitForm').serialize(),
+                success : function(response){
+                    console.log(response);
+                    jQuery('#staticBackdropforEmail').modal('hide');
+                    location.reload();
+                },
+            });
+        });
+
+        jQuery(document).on('click','#billing_id',function(e)
+        {
+            e.preventDefault();
+            var billing_id = jQuery(this).data('id');
+            $.ajax({
+                    url     : "{{ route('billing_address') }}",
+                    type    : 'GET',
+                    dataType: 'json',
+                    data    : {
+                        id : billing_id,
+                    },
+                    success : function(response){
+                        console.log(response.billingAddress.id);
+                        jQuery('#bill_contact_person_name').val(response.billingAddress.contact_person_name);
+                        jQuery('#bill_phone').val(response.billingAddress.phone);
+                        jQuery('#bill_address').val(response.billingAddress.address);
+
+                        if (response.billingAddress.address_type === 'office') {
+                            $('#bill_address_type_office').prop('checked', true);
+                        }
+                        else{
+                            $('#bill_address_type_home').prop('checked', true);
+                        }
+                        $("#bill_city").val(response.billingAddress.city).change();
+                        $("#bill_zip").val(response.billingAddress.zip).change();
+                        jQuery('#billingAddress_id').val(response.billingAddress.id);
+                    },
+                });
+        });
+
+        jQuery('#editBillingAddressForm').on('submit', function(event){
+            event.preventDefault();
+
+            $.ajax({
+                url     : '{{ route("save-editBillingAddressForm") }}',
+                type    : 'post',
+                dataType: 'json',
+                data    : $('#editBillingAddressForm').serialize(),
+                success : function(response){
+                    console.log(response);
+                    jQuery('#staticBackdropforBillingAddressEdit').modal('hide');
+                    location.reload();
+                },
+            });
+        });
+
+
+
+</script>
+
+
+
+
+======================== Routes =======================================================================
+
+
+
+ Route::post('save-shipping-address', 'WebController@saveShippingAddress')->name('save-shipping-address')->middleware('customer');
+ Route::post('get-area', 'WebController@getArea')->name('get-area')->middleware('customer');
+ Route::post('edit-email', 'WebController@editEmail')->name('edit-email')->middleware('customer');
+ Route::get('billing_address', 'WebController@billing_address_edit')->name('billing_address')->middleware('customer');
+ Route::post('save-editBillingAddressForm', 'WebController@saveEditBillingAddressForm')->name('save-editBillingAddressForm')->middleware('customer');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
