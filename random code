@@ -1,1 +1,8 @@
 {{strlen($detail->product['name'])>10?'...':''}}
+-----------------------------------------------------------------------
+<select name="order_status" onchange="order_status(this.value)" class="status form-control" data-id="{{$order['id']}}">
+  <option
+    value="pending" {{$order->order_status == 'pending'?'selected':''}} > Pending </option>
+  <option>
+</select>
+-----------------------------------------------------------------------
