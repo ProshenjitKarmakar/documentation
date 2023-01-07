@@ -1,0 +1,1 @@
+{{strlen($detail->product['name'])>10?'...':''}}
