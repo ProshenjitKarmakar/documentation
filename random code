@@ -8,3 +8,15 @@
 -----------------------------------------------------------------------
 {{$item->customer['f_name']??'Not exist'}}
 ----------------------------------------------------------------------------
+1. Retrieving Data from session
+session()->get('key');
+
+2. Retrieving All session data
+session()->all();
+
+3. Remove data from session
+session()->forget('key'); or session()->flush();
+
+4. Storing Data in session
+session()->put('key', 'value');
+---------------------------------------------------------------------------
